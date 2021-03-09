@@ -1,30 +1,37 @@
 package com.tripmaster.trippricer;
 
 import java.util.List;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tripmaster.common.ProposalForm;
-import com.tripmaster.common.ProviderData;
-
-
+import tripPricer.Provider;
 
 @RestController
 public class TripController {
-	private Logger logger = LoggerFactory.getLogger(TripController.class);
 	@Autowired
-	private TripService tripService;
+	private TripPricerService tripPricerService;
 
-	@GetMapping("/calculateProposals")
-	public List<ProviderData> calculateProposals(@RequestBody ProposalForm proposalForm) {
-		logger.debug("calculateProposals for User " + proposalForm.user.getUserName() + " with Attraction list of size "
-				+ proposalForm.attractions.size() + " and " + proposalForm.cumulativeRewardPoints + "reward points");
-		return tripService.calculateProposals(proposalForm.user, proposalForm.attractions,
-				proposalForm.cumulativeRewardPoints);
+	@PostMapping("/getPrice")
+	public String getPrice(@RequestParam Map<String, Object> requestParams) {
+
+		List<Provider> allProviders = tripPricerService.getPrice(requestParams);
+		StringBuffer result = new StringBuffer();
+
+		result.append("[");
+		for (Provider provider : allProviders) {
+			result.append("{\"name\" : \"").append(provider.name).append("\",");
+			result.append("\"price\" : ").append(provider.price).append(",");
+			result.append("\"tripId\" : \"").append(provider.tripId.toString()).append("\"}");
+
+			if (!provider.equals(allProviders.get(allProviders.size() - 1))) {
+				result.append(",");
+			}
+		}
+		result.append("]");
+		return result.toString();
 	}
 }

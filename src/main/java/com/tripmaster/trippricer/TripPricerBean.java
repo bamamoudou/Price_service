@@ -8,7 +8,12 @@ import tripPricer.TripPricer;
 @Configuration
 public class TripPricerBean {
 	@Bean
-	public TripPricer tripPricer() {
+	public TripPricer getTripPricer() {
 		return new TripPricer();
+	}
+
+	@Bean
+	public TripPricerService getTripPricerService() {
+		return new TripPricerService(getTripPricer());
 	}
 }
